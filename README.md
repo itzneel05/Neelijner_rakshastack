@@ -1,16 +1,6 @@
-# pg_application
+# Project Overview
 
-A new Flutter project.
+PGFinder is a basic Flutter application designed to display available PG (Paying Guest) rooms in different cities, such as Surat, Gujarat. This repository contains the completed frontend UI phase of the project, built during the first 10 days of my 30-day internship. 
 
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+# Demo View [Frontend Only]
+Watch a short demo video of the frontend UI in action: [PGFinder Frontend Demo Video](https://youtu.be/he13FwBhIZE) (1-minute walkthrough showing key screens and navigation).
