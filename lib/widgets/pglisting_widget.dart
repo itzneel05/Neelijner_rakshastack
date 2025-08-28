@@ -1,17 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:pg_application/animations/routeanimation.dart';
 import 'package:pg_application/screens/view_details.dart';
-
+import 'package:pg_application/widgets/fav_icon.dart';
 class PglistingWidget extends StatefulWidget {
-  const PglistingWidget({super.key});
-
+  final String docId;
+  final String name;
+  final String city;
+  final int pricePerMonth;
+  final List<String> amenities;
+  final String? cardUrl;
+  final double rating;
+  const PglistingWidget({
+    super.key,
+    required this.docId,
+    required this.name,
+    required this.city,
+    required this.pricePerMonth,
+    required this.amenities,
+    this.cardUrl,
+    this.rating = 0.0,
+  });
   @override
   State<PglistingWidget> createState() => _PglistingWidgetState();
 }
-
 class _PglistingWidgetState extends State<PglistingWidget> {
+  bool _isFavorite = false;
   @override
   Widget build(BuildContext context) {
+    final shownAmenities = widget.amenities.take(3).toList();
     return Card(
       color: Colors.white,
       child: Column(
@@ -24,12 +40,36 @@ class _PglistingWidgetState extends State<PglistingWidget> {
               const SizedBox(width: 16),
               ClipRRect(
                 borderRadius: BorderRadius.circular(12),
-                child: Image.asset(
-                  'assets/images/pg_01.jpg',
-                  width: 100,
-                  height: 100,
-                  fit: BoxFit.cover,
-                ),
+                child: (widget.cardUrl == null || widget.cardUrl!.isEmpty)
+                    ? Image.asset(
+                        'assets/images/pg_01.jpg',
+                        width: 100,
+                        height: 100,
+                        fit: BoxFit.cover,
+                      ) 
+                    : Image.network(
+                        widget.cardUrl!,
+                        width: 100,
+                        height: 100,
+                        fit: BoxFit.cover,
+                        loadingBuilder: (ctx, child, prog) => prog == null
+                            ? child
+                            : SizedBox(
+                                width: 100,
+                                height: 100,
+                                child: Center(
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                ),
+                              ), 
+                        errorBuilder: (_, __, ___) => Container(
+                          width: 100,
+                          height: 100,
+                          color: Colors.grey.shade200,
+                          child: const Icon(Icons.broken_image),
+                        ), 
+                      ),
               ),
               const SizedBox(width: 12),
               Flexible(
@@ -49,7 +89,7 @@ class _PglistingWidgetState extends State<PglistingWidget> {
                           children: [
                             Flexible(
                               child: Text(
-                                "Demo Paying Guest/PG Room ",
+                                widget.name,
                                 style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 15,
@@ -59,10 +99,12 @@ class _PglistingWidgetState extends State<PglistingWidget> {
                               ),
                             ),
                             IconButton(
-                              onPressed: () {},
+                              onPressed: () {
+                                setState(() => _isFavorite = !_isFavorite);
+                              },
                               padding: EdgeInsets.zero,
                               constraints: const BoxConstraints(maxHeight: 24),
-                              icon: Icon(Icons.favorite_border, size: 28),
+                              icon: FavoriteIconButton(pgId: widget.docId),
                             ),
                             const SizedBox(width: 1),
                           ],
@@ -77,7 +119,7 @@ class _PglistingWidgetState extends State<PglistingWidget> {
                         Icon(Icons.pin_drop, size: 20, color: Colors.grey),
                         const SizedBox(width: 4),
                         Text(
-                          "Surat, Gujarat",
+                          "${widget.city}, Gujarat",
                           style: TextStyle(
                             fontSize: 13,
                             color: const Color.fromARGB(255, 118, 118, 118),
@@ -89,7 +131,7 @@ class _PglistingWidgetState extends State<PglistingWidget> {
                     Container(
                       padding: EdgeInsets.only(left: 2),
                       child: Text(
-                        "₹7000 / Month",
+                        "₹${widget.pricePerMonth} / Month",
                         style: TextStyle(
                           fontSize: 17,
                           fontWeight: FontWeight.bold,
@@ -97,23 +139,23 @@ class _PglistingWidgetState extends State<PglistingWidget> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: 4),
                     Container(
                       padding: EdgeInsets.only(left: 2),
                       child: Row(
                         children: [
-                          Icon(Icons.star, color: Colors.amber, size: 26),
-                          Icon(Icons.star, color: Colors.amber, size: 26),
-                          Icon(Icons.star, color: Colors.amber, size: 26),
-                          Icon(Icons.star, color: Colors.amber, size: 26),
-                          Icon(
-                            Icons.star,
-                            color: const Color.fromARGB(255, 207, 207, 207),
-                            size: 26,
-                          ),
+                          ...List.generate(5, (index) {
+                            return Icon(
+                              Icons.star,
+                              color: index < widget.rating
+                                  ? Colors.amber
+                                  : const Color.fromARGB(255, 207, 207, 207),
+                              size: 26,
+                            );
+                          }),
                           const SizedBox(width: 4),
                           Text(
-                            "4.2",
+                            widget.rating.toStringAsFixed(1),
                             style: TextStyle(
                               fontSize: 13,
                               color: const Color.fromARGB(255, 130, 130, 130),
@@ -129,63 +171,74 @@ class _PglistingWidgetState extends State<PglistingWidget> {
             ],
           ),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const SizedBox(width: 16),
-              Row(
-                children: [
-                  Icon(Icons.wifi, color: Colors.grey, size: 18),
-                  const SizedBox(width: 2),
-                  Text(
-                    "Wifi",
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: const Color.fromARGB(255, 110, 110, 110),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Icon(Icons.ac_unit, color: Colors.grey, size: 18),
-                  const SizedBox(width: 2),
-                  Text(
-                    "AC",
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: const Color.fromARGB(255, 110, 110, 110),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Icon(Icons.local_parking, color: Colors.grey, size: 18),
-                  const SizedBox(width: 2),
-                  Text(
-                    "Parking",
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: const Color.fromARGB(255, 110, 110, 110),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                ],
-              ),
-              OutlinedButton(
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: Color(0xFF1C79D3),
-                  side: const BorderSide(color: Color(0xFF1C79D3)),
-                  textStyle: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 12,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
+              Expanded(
+                child: Wrap(
+                  spacing: 10, 
+                  runSpacing: 6, 
+                  children: shownAmenities.map((a) {
+                    IconData icon;
+                    switch (a.toLowerCase()) {
+                      case 'wifi':
+                        icon = Icons.wifi;
+                        break;
+                      case 'ac':
+                        icon = Icons.ac_unit;
+                        break;
+                      case 'parking':
+                        icon = Icons.local_parking;
+                        break;
+                      case 'housekeeping':
+                        icon = Icons.cleaning_services;
+                        break;
+                      case 'laundry':
+                        icon = Icons.local_laundry_service;
+                        break;
+                      case 'food':
+                        icon = Icons.restaurant;
+                        break;
+                      default:
+                        icon = Icons.check_circle_outline;
+                    }
+                    return Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(icon, color: Colors.grey, size: 18),
+                        const SizedBox(width: 4),
+                        Text(
+                          a,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Color(0xFF6E6E6E),
+                          ),
+                        ),
+                      ],
+                    );
+                  }).toList(),
                 ),
-                onPressed: () {
-                  Navigator.push(context, fadeAnimatedRoute(ViewDetails()));
-                },
-                child: const Text("View Details"),
+              ),
+              const SizedBox(width: 12),
+              SizedBox(
+                width: 140,
+                height: 40,
+                child: OutlinedButton(
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: const Color(0xFF1C79D3),
+                    side: const BorderSide(color: Color(0xFF1C79D3)),
+                    textStyle: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      fadeAnimatedRoute(ViewDetails(pgId: widget.docId)),
+                    );
+                  },
+                  child: const Text("View Details"),
+                ),
               ),
               const SizedBox(width: 16),
             ],
@@ -196,3 +249,4 @@ class _PglistingWidgetState extends State<PglistingWidget> {
     );
   }
 }
+

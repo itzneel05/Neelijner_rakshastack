@@ -1,25 +1,20 @@
 import 'package:flutter/material.dart';
-
 class GenderPreferenceSelector extends StatefulWidget {
   final int initialIndex;
   final void Function(int index)? onChanged;
   GenderPreferenceSelector({this.initialIndex = 0, this.onChanged});
-
   @override
   State<GenderPreferenceSelector> createState() =>
       _GenderPreferenceSelectorState();
 }
-
 class _GenderPreferenceSelectorState extends State<GenderPreferenceSelector> {
   int selectedIndex = 0;
   final List<String> prefs = ['Male Only', 'Female Only', 'Co-ed'];
-
   @override
   void initState() {
     super.initState();
     selectedIndex = widget.initialIndex;
   }
-
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -66,3 +61,4 @@ class _GenderPreferenceSelectorState extends State<GenderPreferenceSelector> {
     );
   }
 }
+

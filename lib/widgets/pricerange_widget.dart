@@ -1,17 +1,13 @@
 import 'package:flutter/material.dart';
-
 class PriceRangeSlider extends StatefulWidget {
   const PriceRangeSlider({super.key});
-
   @override
   State<PriceRangeSlider> createState() => _PriceRangeSliderState();
 }
-
 class _PriceRangeSliderState extends State<PriceRangeSlider> {
   final double _min = 2500;
   final double _max = 25000;
   RangeValues _currentRange = const RangeValues(2500, 25000);
-
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -36,7 +32,6 @@ class _PriceRangeSliderState extends State<PriceRangeSlider> {
             ],
           ),
         ),
-
         RangeSlider(
           values: _currentRange,
           min: _min,
@@ -58,3 +53,4 @@ class _PriceRangeSliderState extends State<PriceRangeSlider> {
     );
   }
 }
+

@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
-
 class InputBoxWidget extends StatelessWidget {
   final String placeholderName;
   final IconData icon;
-
   const InputBoxWidget({
     super.key,
     required this.placeholderName,
     required this.icon,
   });
-
   @override
   Widget build(BuildContext context) {
     return TextFormField(
@@ -33,3 +30,4 @@ class InputBoxWidget extends StatelessWidget {
     );
   }
 }
+

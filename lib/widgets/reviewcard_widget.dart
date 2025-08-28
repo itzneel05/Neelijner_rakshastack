@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 class ReviewCard extends StatelessWidget {
   final String username;
   final String userAvatar;
@@ -14,12 +13,10 @@ class ReviewCard extends StatelessWidget {
     required this.reviewText,
     required this.timeAgo,
   });
-
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 12),
-
       child: Card(
         color: Colors.white,
         elevation: 2,
@@ -32,7 +29,9 @@ class ReviewCard extends StatelessWidget {
               Row(
                 children: [
                   CircleAvatar(
-                    backgroundImage: AssetImage(userAvatar),
+                    backgroundImage: userAvatar.startsWith('http') || userAvatar.startsWith('https')
+                        ? NetworkImage(userAvatar) as ImageProvider
+                        : AssetImage(userAvatar),
                     radius: 18,
                   ),
                   const SizedBox(width: 10),
@@ -52,7 +51,6 @@ class ReviewCard extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 8),
-
               Row(
                 children: List.generate(5, (index) {
                   return Icon(
@@ -63,7 +61,6 @@ class ReviewCard extends StatelessWidget {
                 }),
               ),
               const SizedBox(height: 10),
-
               Row(
                 children: [
                   Expanded(
@@ -91,3 +88,4 @@ class ReviewCard extends StatelessWidget {
     );
   }
 }
+

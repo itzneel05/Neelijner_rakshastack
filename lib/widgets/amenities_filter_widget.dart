@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 class FilterAmenities extends StatefulWidget {
   final bool initialWifi;
   final bool initialAC;
@@ -16,7 +15,6 @@ class FilterAmenities extends StatefulWidget {
     bool food,
   )
   onApply;
-
   const FilterAmenities({
     super.key,
     this.initialWifi = false,
@@ -27,11 +25,9 @@ class FilterAmenities extends StatefulWidget {
     this.initialLaundry = false,
     required this.onApply,
   });
-
   @override
   State<FilterAmenities> createState() => _FilterAmenitiesState();
 }
-
 class _FilterAmenitiesState extends State<FilterAmenities> {
   late bool wifi = widget.initialWifi;
   late bool ac = widget.initialAC;
@@ -39,7 +35,6 @@ class _FilterAmenitiesState extends State<FilterAmenities> {
   late bool housekeeping = widget.initialHousekeeping;
   late bool laundry = widget.initialLaundry;
   late bool food = widget.initialFood;
-
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -47,7 +42,6 @@ class _FilterAmenitiesState extends State<FilterAmenities> {
       children: [
         Row(
           children: [
-            // First Checkbox
             Expanded(
               child: Container(
                 margin: EdgeInsets.only(right: 8),
@@ -82,7 +76,6 @@ class _FilterAmenitiesState extends State<FilterAmenities> {
                 ),
               ),
             ),
-            // Second Checkbox
             Expanded(
               child: Container(
                 margin: EdgeInsets.only(left: 8),
@@ -122,7 +115,6 @@ class _FilterAmenitiesState extends State<FilterAmenities> {
         const SizedBox(height: 8),
         Row(
           children: [
-            // First Checkbox
             Expanded(
               child: Container(
                 margin: EdgeInsets.only(right: 8),
@@ -158,7 +150,6 @@ class _FilterAmenitiesState extends State<FilterAmenities> {
                 ),
               ),
             ),
-            // Second Checkbox
             Expanded(
               child: Container(
                 margin: EdgeInsets.only(left: 8),
@@ -199,7 +190,6 @@ class _FilterAmenitiesState extends State<FilterAmenities> {
         const SizedBox(height: 8),
         Row(
           children: [
-            // First Checkbox
             Expanded(
               child: Container(
                 margin: EdgeInsets.only(right: 8),
@@ -235,7 +225,6 @@ class _FilterAmenitiesState extends State<FilterAmenities> {
                 ),
               ),
             ),
-            // Second Checkbox
             Expanded(
               child: Container(
                 margin: EdgeInsets.only(left: 8),
@@ -276,3 +265,4 @@ class _FilterAmenitiesState extends State<FilterAmenities> {
     );
   }
 }
+

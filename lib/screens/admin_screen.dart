@@ -1,16 +1,40 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:pg_application/animations/routeanimation.dart';
 import 'package:pg_application/screens/addnewpg_screen.dart';
+import 'package:pg_application/screens/login_screen.dart';
 import 'package:pg_application/widgets/admincard_widget.dart';
-
 class AdminScreen extends StatefulWidget {
   const AdminScreen({super.key});
-
   @override
   State<AdminScreen> createState() => _AdminScreenState();
 }
-
 class _AdminScreenState extends State<AdminScreen> {
+  Future<void> _logout() async {
+    try {
+      await FirebaseAuth.instance.signOut(); 
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Logged out successfully!'),
+          ), 
+        );
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const Login(),
+          ), 
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error logging out: $e')));
+      }
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -19,7 +43,6 @@ class _AdminScreenState extends State<AdminScreen> {
         child: AppBar(
           elevation: 2.5,
           shadowColor: Colors.black,
-          // automaticallyImplyLeading: false,
           centerTitle: true,
           backgroundColor: Color.fromRGBO(25, 118, 210, 1),
           title: Text(
@@ -33,7 +56,7 @@ class _AdminScreenState extends State<AdminScreen> {
           ),
           actions: [
             IconButton(
-              onPressed: () {},
+              onPressed: _logout,
               icon: Icon(Icons.logout, color: Colors.white),
             ),
           ],
@@ -45,8 +68,6 @@ class _AdminScreenState extends State<AdminScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             const SizedBox(height: 16),
-
-            // Search Bar
             Container(
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -79,8 +100,6 @@ class _AdminScreenState extends State<AdminScreen> {
               ),
             ),
             const SizedBox(height: 12),
-
-            //Title - Button
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -88,8 +107,6 @@ class _AdminScreenState extends State<AdminScreen> {
                   "Exisiting PG Rooms",
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                 ),
-
-                //Add New Button
                 ElevatedButton(
                   onPressed: () {
                     Navigator.push(
@@ -100,7 +117,6 @@ class _AdminScreenState extends State<AdminScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color.fromARGB(255, 39, 126, 212),
                     foregroundColor: Colors.white,
-                    // padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -113,31 +129,49 @@ class _AdminScreenState extends State<AdminScreen> {
                 ),
               ],
             ),
-
-            //Listview For Rooms
             Expanded(
-              child: ListView.builder(
-                scrollDirection: Axis.vertical,
-                itemCount: 7,
-                itemBuilder: (context, index) {
-                  return AdmincardWidget();
+              child: StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('pgRooms')
+                    .orderBy('createdAt', descending: true)
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  }
+                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                    return Center(child: Text('No PG rooms available'));
+                  }
+                  final rooms = snapshot.data!.docs;
+                  return ListView.builder(
+                    itemCount: rooms.length,
+                    itemBuilder: (context, index) {
+                      final doc = rooms[index];
+                      final docId = doc.id;
+                      final data = doc.data()! as Map<String, dynamic>;
+                      return AdmincardWidget(
+                        docId: docId,
+                        name: data['name'] ?? 'Unnamed PG',
+                        city: data['city'] ?? '',
+                        price: data['pricePerMonth'] ?? 0,
+                        amenities: List<String>.from(data['amenities'] ?? []),
+                      );
+                    },
+                  );
                 },
               ),
             ),
-
-            // FloatingActionButton(onPressed: () {}),
           ],
         ),
       ),
-
-      //Add New Floating Button
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(context, fadeAnimatedRoute(AddEditPgRoomPage()));
         },
         backgroundColor: const Color.fromARGB(255, 28, 121, 211),
-        child: Icon(Icons.add, color: Colors.white), // Accessibility hint
+        child: Icon(Icons.add, color: Colors.white), 
       ),
     );
   }
 }
+

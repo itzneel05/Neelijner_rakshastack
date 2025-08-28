@@ -1,17 +1,12 @@
 import 'package:flutter/material.dart';
-
 class RoomTypeSelector extends StatefulWidget {
   const RoomTypeSelector({super.key});
-
   @override
   State<RoomTypeSelector> createState() => _RoomTypeSelectorState();
 }
-
 class _RoomTypeSelectorState extends State<RoomTypeSelector> {
   int selectedIndex = 0;
-
   final List<String> roomTypes = ['Single', 'Double', 'Triple'];
-
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -67,3 +62,4 @@ class _RoomTypeSelectorState extends State<RoomTypeSelector> {
     );
   }
 }
+

@@ -1,25 +1,115 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:pg_application/animations/routeanimation.dart';
-// import 'package:pg_application/widgets/inputbox_widget.dart';
 import 'package:pg_application/screens/login_screen.dart';
-// import 'package:pg_application/screens/signup_screen.dart';
-
+import 'package:cloud_firestore/cloud_firestore.dart';
 class SignUp extends StatefulWidget {
   const SignUp({super.key});
-
   @override
   State<SignUp> createState() => _SignUpState();
 }
-
 class _SignUpState extends State<SignUp> {
-  // Variables
-  bool isChecked = false;
-  bool _obscurePassword = true;
-  bool _obscureConfirmPassword = true;
-  final _formKey = GlobalKey<FormBuilderState>();
-
+  bool isChecked = false; 
+  bool _obscurePassword = true; 
+  bool _obscureConfirmPassword = true; 
+  final _formKey = GlobalKey<FormBuilderState>(); 
+  final FirebaseAuth _auth = FirebaseAuth.instance; 
+  final TextEditingController _fullnameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
+  final _firestore = FirebaseFirestore.instance;
+  @override
+  void dispose() {
+    _fullnameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
+  }
+  Future<void> _saveUserToFirestore(
+    String authUid,
+    String fullname,
+    String email,
+  ) async {
+    await _firestore.collection('users').doc(authUid).set({
+      'authUid': authUid,
+      'fullName': fullname,
+      'email': email,
+      'createdAt': FieldValue.serverTimestamp(),
+      'phoneNumber': null,
+      'location': {
+        'label': null, 
+        'city': null,
+        'state': null,
+        'coords': null, 
+      },
+    });
+  }
+  Future<void> _signUp() async {
+    if (_formKey.currentState?.validate() ?? false) {
+      if (!isChecked) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please agree to Terms & Conditions')),
+        );
+        return;
+      }
+      final String fullname = _fullnameController.text.trim();
+      final String email = _emailController.text.trim();
+      final String password = _passwordController.text.trim();
+      try {
+        UserCredential userCredential = await _auth
+            .createUserWithEmailAndPassword(email: email, password: password);
+        final String authUid =
+            userCredential.user?.uid ?? ''; 
+        await userCredential.user?.updateDisplayName(
+          fullname,
+        ); 
+        await _saveUserToFirestore(
+          authUid,
+          fullname,
+          email,
+        ); 
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Account created successfully! Please log in.'),
+            ),
+          );
+          Navigator.pushReplacement(context, fadeAnimatedRoute(const Login()));
+        }
+      } on FirebaseAuthException catch (e) {
+        String errorMessage;
+        switch (e.code) {
+          case 'weak-password': 
+            errorMessage = 'The password provided is too weak.';
+            break;
+          case 'email-already-in-use': 
+            errorMessage = 'The account already exists for that email.';
+            break;
+          case 'invalid-email': 
+            errorMessage = 'The email address is invalid.';
+            break;
+          default:
+            errorMessage = 'An error occurred: ${e.message}';
+        }
+        if (context.mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(errorMessage)));
+        }
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Unexpected error: $e')));
+        }
+      }
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return FormBuilder(
@@ -37,7 +127,8 @@ class _SignUpState extends State<SignUp> {
           ),
         ),
         child: Scaffold(
-          backgroundColor: Colors.transparent,
+          backgroundColor: Colors
+              .transparent, 
           body: Center(
             child: SingleChildScrollView(
               child: Padding(
@@ -66,6 +157,7 @@ class _SignUpState extends State<SignUp> {
                         ),
                         const SizedBox(height: 28),
                         FormBuilderTextField(
+                          controller: _fullnameController,
                           name: 'fullname',
                           decoration: InputDecoration(
                             labelText: 'Enter Full Name',
@@ -80,6 +172,7 @@ class _SignUpState extends State<SignUp> {
                         ),
                         const SizedBox(height: 14),
                         FormBuilderTextField(
+                          controller: _emailController,
                           name: 'email',
                           decoration: InputDecoration(
                             labelText: 'Email Address',
@@ -94,11 +187,10 @@ class _SignUpState extends State<SignUp> {
                           ]),
                         ),
                         const SizedBox(height: 14),
-
                         FormBuilderTextField(
+                          controller: _passwordController,
                           name: 'password',
                           obscureText: _obscurePassword,
-
                           decoration: InputDecoration(
                             labelText: 'Password',
                             prefixIcon: Icon(Icons.lock_outline),
@@ -130,9 +222,9 @@ class _SignUpState extends State<SignUp> {
                         ),
                         const SizedBox(height: 14),
                         FormBuilderTextField(
-                          name: 'confirmpassowrd',
+                          controller: _confirmPasswordController,
+                          name: 'confirmpassword',
                           obscureText: _obscureConfirmPassword,
-
                           decoration: InputDecoration(
                             labelText: 'Confirm Password',
                             prefixIcon: Icon(Icons.lock_outline),
@@ -170,7 +262,6 @@ class _SignUpState extends State<SignUp> {
                                   ? null
                                   : 'Passwords do not match';
                             },
-                            // passwordMatchValidator(),
                           ]),
                         ),
                         const SizedBox(height: 2),
@@ -193,10 +284,7 @@ class _SignUpState extends State<SignUp> {
                           height: 48,
                           child: ElevatedButton(
                             onPressed: () {
-                              if (_formKey.currentState?.saveAndValidate() ??
-                                  false) {
-                                // print('Form is valid!');
-                              }
+                              _signUp();
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color.fromARGB(
@@ -265,3 +353,4 @@ class _SignUpState extends State<SignUp> {
     );
   }
 }
+

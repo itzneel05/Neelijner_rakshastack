@@ -1,15 +1,21 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:pg_application/animations/routeanimation.dart';
 import 'package:pg_application/screens/addnewpg_screen.dart';
-
-class AdmincardWidget extends StatefulWidget {
-  const AdmincardWidget({super.key});
-
-  @override
-  State<AdmincardWidget> createState() => _AdmincardWidgetState();
-}
-
-class _AdmincardWidgetState extends State<AdmincardWidget> {
+class AdmincardWidget extends StatelessWidget {
+  final String docId;
+  final String name;
+  final String city;
+  final int price;
+  final List<String> amenities;
+  const AdmincardWidget({
+    super.key,
+    required this.name,
+    required this.city,
+    required this.price,
+    required this.amenities,
+    required this.docId,
+  });
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -21,7 +27,6 @@ class _AdmincardWidgetState extends State<AdmincardWidget> {
         padding: EdgeInsets.all(16),
         child: Row(
           children: [
-            // Left Side - Home Icon
             Container(
               width: 48,
               height: 48,
@@ -32,44 +37,60 @@ class _AdmincardWidgetState extends State<AdmincardWidget> {
               child: Icon(Icons.home, color: Colors.grey.shade600, size: 32),
             ),
             SizedBox(width: 18),
-
-            // Middle Side - Title/Description/Ametitis
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  //PG Room Title
                   Text(
-                    "Demo PG", // Change to dynamic value
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
+                    name,
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   SizedBox(height: 3),
-                  //Description
                   Text(
-                    "City: Surat, Gujarat | Price: ₹8,500/month", // Dynamic as needed
+                    "City: $city | Price: ₹$price/month",
                     style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   SizedBox(height: 9),
-                  //Amenities
                   Row(
-                    children: [
-                      Icon(Icons.wifi, color: Colors.grey, size: 16),
-                      SizedBox(width: 7),
-                      Icon(Icons.ac_unit, color: Colors.grey, size: 16),
-                    ],
+                    children: amenities.take(3).map((amenity) {
+                      IconData? icon;
+                      switch (amenity.toLowerCase()) {
+                        case 'wifi':
+                          icon = Icons.wifi;
+                          break;
+                        case 'ac':
+                          icon = Icons.ac_unit;
+                          break;
+                        case 'parking':
+                          icon = Icons.local_parking;
+                          break;
+                        case 'housekeeping':
+                          icon = Icons.cleaning_services;
+                          break;
+                        case 'laundry':
+                          icon = Icons.local_laundry_service;
+                          break;
+                        case 'food':
+                          icon = Icons.restaurant;
+                          break;
+                        default:
+                          icon = Icons.check_circle_outline;
+                      }
+                      return Padding(
+                        padding: EdgeInsets.only(right: 7),
+                        child: Icon(icon, color: Colors.grey, size: 16),
+                      );
+                    }).toList(),
                   ),
                 ],
               ),
             ),
-
-            // Right Side - Edit/Delete Button
             Column(
               children: [
-                //Edit Button
                 OutlinedButton(
                   style: OutlinedButton.styleFrom(
                     side: BorderSide(color: Color(0xFF1C79D3)),
@@ -83,16 +104,23 @@ class _AdmincardWidgetState extends State<AdmincardWidget> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  onPressed: () {
+                  onPressed: () async {
+                    final docSnapshot = await FirebaseFirestore.instance
+                        .collection('pgRooms')
+                        .doc(docId)
+                        .get();
+                    final data = docSnapshot.data();
+                    if (data == null) return; 
                     Navigator.push(
                       context,
-                      fadeAnimatedRoute(AddEditPgRoomPage()),
+                      fadeAnimatedRoute(
+                        AddEditPgRoomPage(docId: docId, initialData: data),
+                      ),
                     );
                   },
                   child: Text("  Edit  "),
                 ),
                 SizedBox(height: 10),
-                //Delete Button
                 OutlinedButton(
                   style: OutlinedButton.styleFrom(
                     side: BorderSide(color: Colors.red),
@@ -117,3 +145,4 @@ class _AdmincardWidgetState extends State<AdmincardWidget> {
     );
   }
 }
+

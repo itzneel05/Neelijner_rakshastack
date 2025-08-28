@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pg_application/animations/routeanimation.dart';
 import 'package:pg_application/screens/view_details.dart';
-
+import 'package:pg_application/widgets/fav_icon.dart';
 class PropertyCard extends StatelessWidget {
   final String imageUrl;
   final String title;
@@ -9,7 +9,7 @@ class PropertyCard extends StatelessWidget {
   final String price;
   final double rating;
   final bool isFavorite;
-
+  final String pgId;
   const PropertyCard({
     super.key,
     required this.imageUrl,
@@ -17,29 +17,31 @@ class PropertyCard extends StatelessWidget {
     required this.location,
     required this.price,
     required this.rating,
+    required this.pgId,
     this.isFavorite = false,
   });
-
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Navigator.push(context, fadeAnimatedRoute(ViewDetails()));
+        Navigator.push(context, fadeAnimatedRoute(ViewDetails(pgId: pgId)));
       },
       child: Card(
-        elevation: 8,
+        elevation: 4,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-        margin: EdgeInsets.all(12),
+        margin: const EdgeInsets.fromLTRB(12, 12, 12, 8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Stack(
               children: [
                 ClipRRect(
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
-                  child: Image.asset(
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(18),
+                  ),
+                  child: Image.network(
                     imageUrl,
-                    height: 140,
+                    height: 140, 
                     width: double.infinity,
                     fit: BoxFit.cover,
                   ),
@@ -49,53 +51,67 @@ class PropertyCard extends StatelessWidget {
                   right: 14,
                   child: CircleAvatar(
                     backgroundColor: Colors.white,
-                    child: Icon(
-                      Icons.favorite,
-                      color: isFavorite ? Colors.red : Colors.grey[400],
-                    ),
+                    child: FavoriteIconButton(pgId: pgId),
                   ),
                 ),
               ],
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
-                  ),
-                  SizedBox(height: 3),
-                  Text(
-                    location,
-                    style: TextStyle(color: Colors.grey[600], fontSize: 13),
-                  ),
-                  SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        price,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15,
-                          color: Colors.blue,
-                        ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 14),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 8),
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
                       ),
-                      Row(
-                        children: [
-                          Icon(Icons.star, color: Colors.amber, size: 18),
-                          SizedBox(width: 2),
-                          Text(
-                            rating.toString(),
-                            style: TextStyle(fontWeight: FontWeight.w500),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      location,
+                      style: TextStyle(color: Colors.grey, fontSize: 13),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          price,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                            color: Colors.blue,
                           ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ],
+                        ),
+                        Row(
+                          children: [
+                            const Icon(
+                              Icons.star,
+                              color: Colors.amber,
+                              size: 18,
+                            ),
+                            const SizedBox(width: 2),
+                            Text(
+                              rating.toStringAsFixed(1),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8), 
+                  ],
+                ),
               ),
             ),
           ],
@@ -104,3 +120,4 @@ class PropertyCard extends StatelessWidget {
     );
   }
 }
+
