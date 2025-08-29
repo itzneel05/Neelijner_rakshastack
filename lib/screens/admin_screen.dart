@@ -11,6 +11,8 @@ class AdminScreen extends StatefulWidget {
   State<AdminScreen> createState() => _AdminScreenState();
 }
 class _AdminScreenState extends State<AdminScreen> {
+  String _searchQuery = '';
+  
   Future<void> _logout() async {
     try {
       await FirebaseAuth.instance.signOut(); 
@@ -96,7 +98,11 @@ class _AdminScreenState extends State<AdminScreen> {
                   ),
                   contentPadding: const EdgeInsets.symmetric(vertical: 16),
                 ),
-                onSubmitted: (query) {},
+                onChanged: (value) {
+                  setState(() {
+                    _searchQuery = value.trim().toLowerCase();
+                  });
+                },
               ),
             ),
             const SizedBox(height: 12),
@@ -142,11 +148,25 @@ class _AdminScreenState extends State<AdminScreen> {
                   if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                     return Center(child: Text('No PG rooms available'));
                   }
-                  final rooms = snapshot.data!.docs;
+                  
+                  final allRooms = snapshot.data!.docs;
+                  final filteredRooms = _searchQuery.isEmpty 
+                      ? allRooms 
+                      : allRooms.where((doc) {
+                          final data = doc.data()! as Map<String, dynamic>;
+                          final name = (data['name'] ?? '').toString().toLowerCase();
+                          final city = (data['city'] ?? '').toString().toLowerCase();
+                          return name.contains(_searchQuery) || city.contains(_searchQuery);
+                        }).toList();
+                        
+                  if (filteredRooms.isEmpty) {
+                    return Center(child: Text('No matching PG rooms found'));
+                  }
+                  
                   return ListView.builder(
-                    itemCount: rooms.length,
+                    itemCount: filteredRooms.length,
                     itemBuilder: (context, index) {
-                      final doc = rooms[index];
+                      final doc = filteredRooms[index];
                       final docId = doc.id;
                       final data = doc.data()! as Map<String, dynamic>;
                       return AdmincardWidget(
