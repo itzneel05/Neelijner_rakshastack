@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart' show Rx;
 import 'package:pg_application/widgets/avatar_widget.dart';
 import 'package:pg_application/widgets/favorites_service.dart';
-import 'package:pg_application/widgets/favcard_widget.dart'; 
+import 'package:pg_application/widgets/favcard_widget.dart';
+
 class Fav extends StatelessWidget {
   const Fav({super.key});
   static const _chunkSize = 10;
@@ -20,9 +21,10 @@ class Fav extends StatelessWidget {
     }
     return chunks;
   }
+
   @override
   Widget build(BuildContext context) {
-    final favs = FavoritesService(); 
+    final favs = FavoritesService();
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(62.0),
@@ -53,7 +55,7 @@ class Fav extends StatelessWidget {
         ),
       ),
       body: StreamBuilder<Set<String>>(
-        stream: favs.idsStream(), 
+        stream: favs.idsStream(),
         builder: (context, favSnap) {
           if (!favSnap.hasData) {
             return const Center(child: CircularProgressIndicator());
@@ -125,6 +127,7 @@ class Fav extends StatelessWidget {
     );
   }
 }
+
 class _FavoritesGrid extends StatelessWidget {
   const _FavoritesGrid({required this.docs});
   final List<QueryDocumentSnapshot<Map<String, dynamic>>> docs;
@@ -136,18 +139,18 @@ class _FavoritesGrid extends StatelessWidget {
         itemCount: docs.length,
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
-          childAspectRatio: 0.66,
+          mainAxisSpacing: 10,
+          crossAxisSpacing: 5,
+          mainAxisExtent: 280,
+          // childAspectRatio: 0.65,
         ),
         itemBuilder: (context, index) {
           final doc = docs[index];
           final m = doc.data();
           final photos = (m['photos'] ?? {}) as Map<String, dynamic>;
-          final cardUrl =
-              (photos['cardUrl'] ?? '')
-                  as String?; 
+          final cardUrl = (photos['cardUrl'] ?? '') as String?;
           final name = (m['name'] ?? '') as String;
           final city = (m['city'] ?? '') as String;
-          final state = (m['state'] ?? '') as String? ?? '';
           final price = (m['pricePerMonth'] ?? 0).toString();
           final rating = (m['rating'] as num?)?.toDouble() ?? 0.0;
           return PropertyCard(
@@ -166,4 +169,3 @@ class _FavoritesGrid extends StatelessWidget {
     );
   }
 }
-

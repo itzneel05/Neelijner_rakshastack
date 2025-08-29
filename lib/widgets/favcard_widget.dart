@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pg_application/animations/routeanimation.dart';
 import 'package:pg_application/screens/view_details.dart';
 import 'package:pg_application/widgets/fav_icon.dart';
+
 class PropertyCard extends StatelessWidget {
   final String imageUrl;
   final String title;
@@ -29,7 +30,7 @@ class PropertyCard extends StatelessWidget {
       child: Card(
         elevation: 4,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-        margin: const EdgeInsets.fromLTRB(12, 12, 12, 8),
+        margin: const EdgeInsets.fromLTRB(8, 8, 8, 8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -41,15 +42,25 @@ class PropertyCard extends StatelessWidget {
                   ),
                   child: Image.network(
                     imageUrl,
-                    height: 140, 
+                    height: 130,
                     width: double.infinity,
                     fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        height: 130,
+                        color: Colors.grey[200],
+                        child: const Center(
+                          child: Icon(Icons.image_not_supported, size: 40),
+                        ),
+                      );
+                    },
                   ),
                 ),
                 Positioned(
-                  top: 14,
-                  right: 14,
+                  top: 10,
+                  right: 10,
                   child: CircleAvatar(
+                    radius: 16,
                     backgroundColor: Colors.white,
                     child: FavoriteIconButton(pgId: pgId),
                   ),
@@ -58,11 +69,10 @@ class PropertyCard extends StatelessWidget {
             ),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 14),
+                padding: const EdgeInsets.all(10),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(height: 8),
                     Text(
                       title,
                       style: const TextStyle(
@@ -79,7 +89,7 @@ class PropertyCard extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 4),
+                    const Spacer(),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -96,20 +106,20 @@ class PropertyCard extends StatelessWidget {
                             const Icon(
                               Icons.star,
                               color: Colors.amber,
-                              size: 18,
+                              size: 16,
                             ),
                             const SizedBox(width: 2),
                             Text(
                               rating.toStringAsFixed(1),
                               style: const TextStyle(
                                 fontWeight: FontWeight.w500,
+                                fontSize: 13,
                               ),
                             ),
                           ],
                         ),
                       ],
                     ),
-                    const SizedBox(height: 8), 
                   ],
                 ),
               ),
@@ -120,4 +130,3 @@ class PropertyCard extends StatelessWidget {
     );
   }
 }
-
